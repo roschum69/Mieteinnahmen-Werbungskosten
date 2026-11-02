@@ -17,7 +17,30 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Kennwort-Schutz Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 border border-slate-200 text-center">
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Geschützter Bereich</h2>
+            <p class="text-xs text-slate-500 mb-6">Bitte geben Sie das Kennwort ein, um auf die Steuererklärung und Mieteinnahmen zuzugreifen.</p>
+            <form onsubmit="checkPassword(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="password-input" placeholder="Kennwort eingeben..." required
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm text-center font-semibold focus:outline-none focus:bg-white focus:border-indigo-600 transition">
+                </div>
+                <div id="password-error" class="text-rose-600 text-xs hidden font-medium">Falsches Kennwort! Bitte versuchen Sie es erneut.</div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm transition shadow-sm cursor-pointer">
+                    Anmelden
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hauptanwendung (Standardmäßig unsichtbar bis Anmeldung erfolgt) -->
+    <div id="app-container" class="max-w-7xl mx-auto space-y-8 hidden">
         
         <!-- Kopfbereich -->
         <header class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -174,18 +197,18 @@
                         <span class="text-xs text-slate-500">Standard Kalt:</span>
                         <input type="text" id="std-kalt-val" value="650,00" class="w-20 text-right text-xs font-semibold focus:outline-none">
                         <span class="text-xs text-slate-500">€</span>
-                        <button type="button" onclick="fillEmptyMonths('kalt')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded transition cursor-pointer" title="Nur in leere Monate eintragen">In alle Leeren</button>
-                        <button type="button" onclick="fillAllMonths('kalt')" class="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded transition cursor-pointer" title="In alle 12 Monate eintragen (überschreibt bestehende)">Alle (12)</button>
+                        <button type="button" onclick="fillEmptyMonths('kalt')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded transition cursor-pointer">In alle Leeren</button>
+                        <button type="button" onclick="fillAllMonths('kalt')" class="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded transition cursor-pointer">Alle (12)</button>
                     </div>
                     <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded-lg px-2 py-1">
                         <span class="text-xs text-slate-500">Standard NK:</span>
                         <input type="text" id="std-nk-val" value="180,00" class="w-20 text-right text-xs font-semibold focus:outline-none">
                         <span class="text-xs text-slate-500">€</span>
-                        <button type="button" onclick="fillEmptyMonths('nk')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded transition cursor-pointer" title="Nur in leere Monate eintragen">In alle Leeren</button>
-                        <button type="button" onclick="fillAllMonths('nk')" class="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded transition cursor-pointer" title="In alle 12 Monate eintragen (überschreibt bestehende)">Alle (12)</button>
+                        <button type="button" onclick="fillEmptyMonths('nk')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded transition cursor-pointer">In alle Leeren</button>
+                        <button type="button" onclick="fillAllMonths('nk')" class="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded transition cursor-pointer">Alle (12)</button>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button type="button" onclick="resetAllMonths()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1" title="Alle Monate auf 0,00 € setzen">
+                        <button type="button" onclick="resetAllMonths()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1">
                             <svg class="w-3.5 h-3.5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             Alle auf 0 €
                         </button>
@@ -229,438 +252,410 @@
         <footer class="text-center text-xs text-slate-400 py-6 border-t border-slate-200">
             <p>Erstellt für Wittelsbacherstr. 25, 86556 Kühbach • Alle Angaben ohne Gewähr • Hilfestellung für die steuerliche Veranlagung (Anlage V)</p>
         </footer>
-
-        <!-- JavaScript Logik -->
-        <script>
-            // Definition der Einheiten laut Vorgabe
-            const unitsData = [
-                { id: 'ug', name: 'UG (Untergeschoss)', area: 71.00, rented: false },
-                { id: 'eg', name: 'EG (Erdgeschoss)', area: 118.23, rented: true },
-                { id: 'dg1', name: 'DG1 (Appartement)', area: 45.14, rented: true },
-                { id: 'dg2', name: 'DG2 (Dachgeschoss 2)', area: 102.65, rented: false },
-                { id: 'dg3', name: 'DG3 (Dachgeschoss 3)', area: 40.83, rented: false }
-            ];
-
-            const months = [
-                "Januar", "Februar", "März", "April", "Mai", "Juni",
-                "Juli", "August", "September", "Oktober", "November", "Dezember"
-            ];
-
-            let currentActiveUnit = 'eg';
-            let afaValue = 3500.00;
-
-            // Werbungskosten Standard (ohne Fremdkapitalzinsen)
-            let wkCategories = [
-                { id: 'grundsteuer', name: 'Grundsteuer', desc: 'Gemeinde Kühbach', amount: 480.00 },
-                { id: 'versicherung', name: 'Gebäude- & Haftpflichtversicherung', desc: 'Wohngebäude, Haftpflicht', amount: 950.00 },
-                { id: 'instandhaltung', name: 'Instandhaltung / Reparaturen', desc: 'Kleinreparaturen, Handwerker', amount: 1200.00 },
-                { id: 'schornsteinfeger', name: 'Schornsteinfeger & Abgaben', desc: 'Öffentliche Abgaben', amount: 320.00 },
-                { id: 'verwaltung', name: 'Verwaltungskosten & Sonstiges', desc: 'Porto, Kontoführung, Steuerberatung', amount: 250.00 }
-            ];
-
-            function loadData() {
-                const saved = localStorage.getItem('wittelsbacher_miet_data_2026_v8');
-                if (saved) {
-                    try { return JSON.parse(saved); } catch (e) { console.error(e); }
-                }
-                
-                const initial = {};
-                unitsData.forEach(u => {
-                    initial[u.id] = [];
-                    for (let i = 0; i < 12; i++) {
-                        initial[u.id].push({
-                            kalt: u.rented ? (u.id === 'eg' ? 850.00 : 420.00) : 0,
-                            nk: u.rented ? (u.id === 'eg' ? 220.00 : 110.00) : 0
-                        });
-                    }
-                });
-                return initial;
-            }
-
-            let appData = loadData();
-
-            function loadWkData() {
-                const saved = localStorage.getItem('wittelsbacher_wk_data_2026_v8');
-                if (saved) {
-                    try { wkCategories = JSON.parse(saved); } catch (e) { console.error(e); }
-                }
-                const savedAfa = localStorage.getItem('wittelsbacher_afa_2026_v8');
-                if (savedAfa) {
-                    afaValue = parseFloat(savedAfa) || 3500.00;
-                }
-            }
-
-            loadWkData();
-
-            function saveData() {
-                localStorage.setItem('wittelsbacher_miet_data_2026_v8', JSON.stringify(appData));
-                localStorage.setItem('wittelsbacher_wk_data_2026_v8', JSON.stringify(wkCategories));
-                localStorage.setItem('wittelsbacher_afa_2026_v8', afaValue.toString());
-                updateAllCalculations();
-            }
-
-            function resetData() {
-                localStorage.removeItem('wittelsbacher_miet_data_2026_v8');
-                localStorage.removeItem('wittelsbacher_wk_data_2026_v8');
-                localStorage.removeItem('wittelsbacher_afa_2026_v8');
-                appData = loadData();
-                loadWkData();
-                renderUnitsStatus();
-                renderUnitsOverviewTable();
-                renderWkTable();
-                switchUnit(currentActiveUnit);
-                updateAllCalculations();
-            }
-
-            function formatCurrency(num) {
-                return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-            }
-
-            function parseGermanNumber(str) {
-                if (typeof str === 'number') return str;
-                if (!str) return 0;
-                let clean = str.toString().replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]+/g, "");
-                return parseFloat(clean) || 0;
-            }
-
-            function renderUnitsStatus() {
-                const grid = document.getElementById('units-status-grid');
-                if (!grid) return;
-                grid.innerHTML = '';
-                unitsData.forEach(u => {
-                    grid.innerHTML += `
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
-                            <div>
-                                <span class="text-xs font-semibold text-slate-500 uppercase">${u.id.toUpperCase()}</span>
-                                <h3 class="font-bold text-slate-800 text-sm mt-0.5">${u.name}</h3>
-                            </div>
-                            <div class="mt-4 flex items-end justify-between">
-                                <div>
-                                    <span class="text-xs text-slate-500 block">Fläche</span>
-                                    <span class="font-bold text-slate-900">${u.area.toFixed(2).replace('.', ',')} m²</span>
-                                </div>
-                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${u.rented ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                                    ${u.rented ? 'Vermietet' : 'Eigengenutzt'}
-                                </span>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            function renderUnitsOverviewTable() {
-                const tbody = document.getElementById('summary-units-tbody');
-                if (!tbody) return;
-                tbody.innerHTML = '';
-                unitsData.forEach(u => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                            <td class="py-3 px-4 font-semibold text-slate-800">${u.name}</td>
-                            <td class="py-3 px-4 text-center">
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${u.rented ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
-                                    ${u.rented ? 'Vermietet' : 'Eigengenutzt'}
-                                </span>
-                            </td>
-                            <td class="py-3 px-4 text-right">${u.area.toFixed(2).replace('.', ',')} m²</td>
-                            <td class="py-3 px-4 text-right font-medium text-slate-700" id="sum-kalt-${u.id}">0,00 €</td>
-                            <td class="py-3 px-4 text-right font-medium text-slate-700" id="sum-nk-${u.id}">0,00 €</td>
-                            <td class="py-3 px-4 text-right font-bold text-slate-900 bg-slate-50/50" id="sum-ges-${u.id}">0,00 €</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            function renderWkTable() {
-                const tbody = document.getElementById('wk-table-body');
-                if (!tbody) return;
-                tbody.innerHTML = '';
-                wkCategories.forEach((cat, index) => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition border-b border-slate-100" id="wk-row-${index}">
-                            <td class="py-3 px-4">
-                                <input type="text" id="wk-name-${index}" value="${cat.name}" disabled
-                                    class="w-full bg-transparent border border-transparent rounded px-2 py-1 font-semibold text-slate-800 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
-                            </td>
-                            <td class="py-3 px-4">
-                                <input type="text" id="wk-desc-${index}" value="${cat.desc}" disabled
-                                    class="w-full bg-transparent border border-transparent rounded px-2 py-1 text-slate-600 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
-                            </td>
-                            <td class="py-3 px-4 text-right">
-                                <div class="relative flex items-center justify-end gap-1">
-                                    <input type="text" id="wk-amount-${index}" value="${cat.amount.toFixed(2).replace('.', ',')}" disabled
-                                        class="w-28 text-right bg-transparent border border-transparent rounded px-2 py-1 font-bold text-slate-900 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-center no-print">
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <button type="button" onclick="toggleEditWk(${index})" id="wk-edit-btn-${index}" title="Bearbeiten" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition cursor-pointer">
-                                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </button>
-                                    <button type="button" onclick="removeWkCategory(${index})" title="Löschen" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer">
-                                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-
-            function toggleEditWk(index) {
-                const nameInput = document.getElementById(`wk-name-${index}`);
-                const descInput = document.getElementById(`wk-desc-${index}`);
-                const amountInput = document.getElementById(`wk-amount-${index}`);
-                const editBtn = document.getElementById(`wk-edit-btn-${index}`);
-                const row = document.getElementById(`wk-row-${index}`);
-
-                if (!nameInput) return;
-                const isDisabled = nameInput.disabled;
-
-                if (isDisabled) {
-                    nameInput.disabled = false;
-                    descInput.disabled = false;
-                    amountInput.disabled = false;
-                    
-                    nameInput.classList.remove('bg-transparent', 'border-transparent');
-                    nameInput.classList.add('bg-white', 'border-indigo-500');
-                    descInput.classList.remove('bg-transparent', 'border-transparent');
-                    descInput.classList.add('bg-white', 'border-indigo-500');
-                    amountInput.classList.remove('bg-transparent', 'border-transparent');
-                    amountInput.classList.add('bg-white', 'border-indigo-500');
-                    row.classList.add('bg-indigo-50/25');
-                    
-                    editBtn.innerHTML = `<svg class="w-4 h-4 text-emerald-600 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
-                    editBtn.title = "Speichern";
-                    nameInput.focus();
-                } else {
-                    wkCategories[index].name = nameInput.value;
-                    wkCategories[index].desc = descInput.value;
-                    wkCategories[index].amount = parseGermanNumber(amountInput.value);
-                    saveData();
-                    renderWkTable();
-                }
-            }
-
-            function addWkCategory() {
-                wkCategories.push({ id: 'custom_' + Date.now(), name: 'Neue Ausgabe', desc: 'Beschreibung / Beleg', amount: 0.00 });
-                saveData();
-                renderWkTable();
-            }
-
-            function removeWkCategory(index) {
-                if (wkCategories.length <= 1) return;
-                wkCategories.splice(index, 1);
-                saveData();
-                renderWkTable();
-            }
-
-            function updateAfa(value) {
-                afaValue = parseGermanNumber(value);
-                saveData();
-            }
-
-            function updateAllCalculations() {
-                let totalHausKalt = 0;
-                let totalHausNk = 0;
-                let totalHausGes = 0;
-
-                unitsData.forEach(unit => {
-                    let sumKalt = 0;
-                    let sumNk = 0;
-
-                    for (let i = 0; i < 12; i++) {
-                        const m = appData[unit.id][i];
-                        sumKalt += m.kalt;
-                        sumNk += m.nk;
-                    }
-                    const sumGes = sumKalt + sumNk;
-
-                    totalHausKalt += sumKalt;
-                    totalHausNk += sumNk;
-                    totalHausGes += sumGes;
-
-                    const elKalt = document.getElementById(`sum-kalt-${unit.id}`);
-                    const elNk = document.getElementById(`sum-nk-${unit.id}`);
-                    const elGes = document.getElementById(`sum-ges-${unit.id}`);
-
-                    if (elKalt) elKalt.innerText = formatCurrency(sumKalt);
-                    if (elNk) elNk.innerText = formatCurrency(sumNk);
-                    if (elGes) elGes.innerText = formatCurrency(sumGes);
-                });
-
-                const totalWk = wkCategories.reduce((acc, cat) => acc + cat.amount, 0);
-                const totalEinnahmen = totalHausKalt + totalHausNk;
-                const ergebnisUeberschuss = totalEinnahmen - (totalWk + afaValue);
-
-                const elTotalKalt = document.getElementById('total-haus-kalt');
-                const elTotalNk = document.getElementById('total-haus-nk');
-                const elTotalGes = document.getElementById('total-haus-ges');
-                const elTotalWk = document.getElementById('summary-total-wk');
-                const elTotalEinnahmenV = document.getElementById('summary-total-einnahmen-v');
-                const elErgebnis = document.getElementById('summary-ergebnis');
-
-                if (elTotalKalt) elTotalKalt.innerText = formatCurrency(totalHausKalt);
-                if (elTotalNk) elTotalNk.innerText = formatCurrency(totalHausNk);
-                if (elTotalGes) elTotalGes.innerText = formatCurrency(totalHausGes);
-                if (elTotalWk) elTotalWk.innerText = formatCurrency(totalWk);
-                if (elTotalEinnahmenV) elTotalEinnahmenV.innerText = formatCurrency(totalEinnahmen);
-                if (elErgebnis) {
-                    elErgebnis.innerText = formatCurrency(ergebnisUeberschuss);
-                    elErgebnis.className = ergebnisUeberschuss >= 0 ? "text-xl font-extrabold text-white" : "text-xl font-extrabold text-rose-200";
-                }
-            }
-
-            function switchUnit(unitId) {
-                currentActiveUnit = unitId;
-                
-                const tabsContainer = document.getElementById('unit-tabs-container');
-                if (!tabsContainer) return;
-                tabsContainer.innerHTML = '';
-                unitsData.forEach(u => {
-                    const isActive = u.id === unitId;
-                    tabsContainer.innerHTML += `
-                        <button type="button" onclick="switchUnit('${u.id}')" class="py-2.5 px-4 text-center font-bold text-sm rounded-xl transition shadow-xs cursor-pointer ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}">
-                            ${u.name.split(' ')[0]} ${u.rented ? '🟢' : '⚪'}
-                        </button>
-                    `;
-                });
-
-                const tbody = document.getElementById('monthly-table-body');
-                if (!tbody) return;
-                tbody.innerHTML = '';
-
-                const unitObj = unitsData.find(u => u.id === unitId);
-                const titleEl = document.getElementById('active-unit-title');
-                const badgeEl = document.getElementById('active-unit-status-badge');
-                const annualTotalEl = document.getElementById('active-unit-annual-total');
-
-                if (titleEl) titleEl.innerText = `${unitObj.name} (${unitObj.area.toFixed(2).replace('.', ',')} m²)`;
-                if (badgeEl) {
-                    badgeEl.innerText = unitObj.rented ? 'Vermietet' : 'Eigengenutzt';
-                    badgeEl.className = unitObj.rented ? 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800' : 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
-                }
-
-                let runningGesamt = 0;
-                let unitAnnualGesamt = 0;
-
-                months.forEach((monthName, index) => {
-                    const rowData = appData[unitId][index];
-                    const gesamtMonat = rowData.kalt + rowData.nk;
-                    runningGesamt += gesamtMonat;
-                    unitAnnualGesamt += gesamtMonat;
-
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition border-b border-slate-100" id="m-row-${unitId}-${index}">
-                            <td class="py-3 px-4 font-semibold text-slate-700">${monthName}</td>
-                            <td class="py-2.5 px-4 text-right">
-                                <div class="relative flex items-center justify-end gap-1">
-                                    <input type="text" id="m-kalt-input-${unitId}-${index}" value="${rowData.kalt.toFixed(2).replace('.', ',')}" disabled
-                                        class="w-28 text-right bg-transparent border border-transparent rounded px-2 py-1 font-medium text-slate-800 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
-                                </div>
-                            </td>
-                            <td class="py-2.5 px-4 text-right">
-                                <div class="relative flex items-center justify-end gap-1">
-                                    <input type="text" id="m-nk-input-${unitId}-${index}" value="${rowData.nk.toFixed(2).replace('.', ',')}" disabled
-                                        class="w-28 text-right bg-transparent border border-transparent rounded px-2 py-1 font-medium text-slate-800 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-right font-bold text-slate-900 bg-slate-50/50">
-                                ${formatCurrency(gesamtMonat)}
-                            </td>
-                            <td class="py-3 px-4 text-right font-semibold text-indigo-600 bg-indigo-50/30">
-                                <div class="flex items-center justify-end gap-3">
-                                    <span>${formatCurrency(runningGesamt)}</span>
-                                    <button type="button" onclick="toggleEditMonth('${unitId}', ${index})" id="m-edit-btn-${unitId}-${index}" title="Bearbeiten" class="no-print p-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded transition cursor-pointer">
-                                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                if (annualTotalEl) annualTotalEl.innerText = formatCurrency(unitAnnualGesamt);
-            }
-
-            function toggleEditMonth(unitId, index) {
-                const kaltInput = document.getElementById(`m-kalt-input-${unitId}-${index}`);
-                const nkInput = document.getElementById(`m-nk-input-${unitId}-${index}`);
-                const editBtn = document.getElementById(`m-edit-btn-${unitId}-${index}`);
-                const row = document.getElementById(`m-row-${unitId}-${index}`);
-
-                if (!kaltInput) return;
-                const isDisabled = kaltInput.disabled;
-
-                if (isDisabled) {
-                    kaltInput.disabled = false;
-                    nkInput.disabled = false;
-                    
-                    kaltInput.classList.remove('bg-transparent', 'border-transparent');
-                    kaltInput.classList.add('bg-white', 'border-indigo-500');
-                    nkInput.classList.remove('bg-transparent', 'border-transparent');
-                    nkInput.classList.add('bg-white', 'border-indigo-500');
-                    row.classList.add('bg-indigo-50/25');
-                    
-                    editBtn.innerHTML = `<svg class="w-4 h-4 text-emerald-600 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
-                    editBtn.title = "Speichern";
-                    kaltInput.focus();
-                } else {
-                    appData[unitId][index].kalt = parseGermanNumber(kaltInput.value);
-                    appData[unitId][index].nk = parseGermanNumber(nkInput.value);
-                    saveData();
-                    switchUnit(unitId);
-                }
-            }
-
-            function fillEmptyMonths(type) {
-                const valInput = document.getElementById(type === 'kalt' ? 'std-kalt-val' : 'std-nk-val');
-                if (!valInput) return;
-                const val = parseGermanNumber(valInput.value);
-                
-                for (let i = 0; i < 12; i++) {
-                    if (appData[currentActiveUnit][i][type] === 0 || isNaN(appData[currentActiveUnit][i][type])) {
-                        appData[currentActiveUnit][i][type] = val;
-                    }
-                }
-
-                saveData();
-                switchUnit(currentActiveUnit);
-            }
-
-            function fillAllMonths(type) {
-                const valInput = document.getElementById(type === 'kalt' ? 'std-kalt-val' : 'std-nk-val');
-                if (!valInput) return;
-                const val = parseGermanNumber(valInput.value);
-                
-                for (let i = 0; i < 12; i++) {
-                    appData[currentActiveUnit][i][type] = val;
-                }
-
-                saveData();
-                switchUnit(currentActiveUnit);
-            }
-
-            function resetAllMonths() {
-                for (let i = 0; i < 12; i++) {
-                    appData[currentActiveUnit][i].kalt = 0;
-                    appData[currentActiveUnit][i].nk = 0;
-                }
-                saveData();
-                switchUnit(currentActiveUnit);
-            }
-
-            window.addEventListener('DOMContentLoaded', () => {
-                const afaInput = document.getElementById('afa-input');
-                if (afaInput) {
-                    afaInput.value = afaValue.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                }
-                renderUnitsStatus();
-                renderUnitsOverviewTable();
-                renderWkTable();
-                switchUnit('eg');
-                updateAllCalculations();
-            });
-        </script>
     </div>
+
+    <!-- JavaScript Logik -->
+    <script>
+        // Passwort-Prüfung
+        function checkPassword(event) {
+            event.preventDefault();
+            const input = document.getElementById('password-input').value;
+            const errorEl = document.getElementById('password-error');
+            
+            if (input === 'Geheim1969') {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                initApp();
+            } else {
+                errorEl.classList.remove('hidden');
+                document.getElementById('password-input').focus();
+            }
+        }
+
+        const unitsData = [
+            { id: 'ug', name: 'UG (Untergeschoss)', area: 71.00, rented: false },
+            { id: 'eg', name: 'EG (Erdgeschoss)', area: 118.23, rented: true },
+            { id: 'dg1', name: 'DG1 (Appartement)', area: 45.14, rented: true },
+            { id: 'dg2', name: 'DG2 (Dachgeschoss 2)', area: 102.65, rented: false },
+            { id: 'dg3', name: 'DG3 (Dachgeschoss 3)', area: 40.83, rented: false }
+        ];
+
+        const months = [
+            "Januar", "Februar", "März", "April", "Mai", "Juni",
+            "Juli", "August", "September", "Oktober", "November", "Dezember"
+        ];
+
+        let currentActiveUnit = 'eg';
+        let afaValue = 3500.00;
+
+        let wkCategories = [
+            { id: 'grundsteuer', name: 'Grundsteuer', desc: 'Gemeinde Kühbach', amount: 480.00 },
+            { id: 'versicherung', name: 'Gebäude- & Haftpflichtversicherung', desc: 'Wohngebäude, Haftpflicht', amount: 950.00 },
+            { id: 'instandhaltung', name: 'Instandhaltung / Reparaturen', desc: 'Kleinreparaturen, Handwerker', amount: 1200.00 },
+            { id: 'schornsteinfeger', name: 'Schornsteinfeger & Abgaben', desc: 'Öffentliche Abgaben', amount: 320.00 },
+            { id: 'verwaltung', name: 'Verwaltungskosten & Sonstiges', desc: 'Porto, Kontoführung, Steuerberatung', amount: 250.00 }
+        ];
+
+        function loadData() {
+            const saved = localStorage.getItem('wittelsbacher_miet_data_2026_v8');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) { console.error(e); }
+            }
+            
+            const initial = {};
+            unitsData.forEach(u => {
+                initial[u.id] = [];
+                for (let i = 0; i < 12; i++) {
+                    initial[u.id].push({
+                        kalt: u.rented ? (u.id === 'eg' ? 850.00 : 420.00) : 0,
+                        nk: u.rented ? (u.id === 'eg' ? 220.00 : 110.00) : 0
+                    });
+                }
+            });
+            return initial;
+        }
+
+        let appData = loadData();
+
+        function loadWkData() {
+            const saved = localStorage.getItem('wittelsbacher_wk_data_2026_v8');
+            if (saved) {
+                try { wkCategories = JSON.parse(saved); } catch (e) { console.error(e); }
+            }
+            const savedAfa = localStorage.getItem('wittelsbacher_afa_2026_v8');
+            if (savedAfa) {
+                afaValue = parseFloat(savedAfa) || 3500.00;
+            }
+        }
+
+        loadWkData();
+
+        function saveData() {
+            localStorage.setItem('wittelsbacher_miet_data_2026_v8', JSON.stringify(appData));
+            localStorage.setItem('wittelsbacher_wk_data_2026_v8', JSON.stringify(wkCategories));
+            localStorage.setItem('wittelsbacher_afa_2026_v8', afaValue.toString());
+            updateAllCalculations();
+        }
+
+        function resetData() {
+            if (!confirm("Möchten Sie wirklich alle Daten zurücksetzen?")) return;
+            localStorage.removeItem('wittelsbacher_miet_data_2026_v8');
+            localStorage.removeItem('wittelsbacher_wk_data_2026_v8');
+            localStorage.removeItem('wittelsbacher_afa_2026_v8');
+            appData = loadData();
+            loadWkData();
+            initApp();
+        }
+
+        function formatCurrency(num) {
+            return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        }
+
+        function parseGermanNumber(str) {
+            if (typeof str === 'number') return str;
+            if (!str) return 0;
+            let clean = str.toString().replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]+/g, "");
+            return parseFloat(clean) || 0;
+        }
+
+        function initApp() {
+            const afaInput = document.getElementById('afa-input');
+            if (afaInput) afaInput.value = afaValue.toFixed(2).replace('.', ',');
+            renderUnitsStatus();
+            renderUnitsOverviewTable();
+            renderWkTable();
+            renderUnitTabs();
+            switchUnit(currentActiveUnit);
+            updateAllCalculations();
+        }
+
+        function renderUnitsStatus() {
+            const grid = document.getElementById('units-status-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            unitsData.forEach(u => {
+                grid.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase">${u.id.toUpperCase()}</span>
+                            <h3 class="font-bold text-slate-800 text-sm mt-0.5">${u.name}</h3>
+                        </div>
+                        <div class="mt-4 flex items-end justify-between">
+                            <div>
+                                <span class="text-xs text-slate-500 block">Fläche</span>
+                                <span class="font-bold text-slate-900">${u.area.toFixed(2).replace('.', ',')} m²</span>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${u.rented ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                ${u.rented ? 'Vermietet' : 'Eigengenutzt'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderUnitsOverviewTable() {
+            const tbody = document.getElementById('summary-units-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            unitsData.forEach(u => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-3 px-4 font-semibold text-slate-800">${u.name}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${u.rented ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
+                                ${u.rented ? 'Vermietet' : 'Eigengenutzt'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right">${u.area.toFixed(2).replace('.', ',')} m²</td>
+                        <td class="py-3 px-4 text-right font-medium text-slate-700" id="sum-kalt-${u.id}">0,00 €</td>
+                        <td class="py-3 px-4 text-right font-medium text-slate-700" id="sum-nk-${u.id}">0,00 €</td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-900 bg-slate-50/50" id="sum-ges-${u.id}">0,00 €</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderWkTable() {
+            const tbody = document.getElementById('wk-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            wkCategories.forEach((cat, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition border-b border-slate-100" id="wk-row-${index}">
+                        <td class="py-3 px-4">
+                            <input type="text" id="wk-name-${index}" value="${cat.name}" disabled
+                                class="w-full bg-transparent border border-transparent rounded px-2 py-1 font-semibold text-slate-800 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
+                        </td>
+                        <td class="py-3 px-4">
+                            <input type="text" id="wk-desc-${index}" value="${cat.desc}" disabled
+                                class="w-full bg-transparent border border-transparent rounded px-2 py-1 text-slate-600 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <div class="relative flex items-center justify-end gap-1">
+                                <input type="text" id="wk-amount-${index}" value="${cat.amount.toFixed(2).replace('.', ',')}" disabled
+                                    class="w-28 text-right bg-transparent border border-transparent rounded px-2 py-1 font-bold text-slate-900 text-sm disabled:opacity-100 disabled:cursor-default focus:bg-white focus:border-indigo-600">
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-center no-print">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button type="button" onclick="toggleEditWk(${index})" id="wk-edit-btn-${index}" title="Bearbeiten" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition cursor-pointer">
+                                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <button type="button" onclick="removeWkCategory(${index})" title="Löschen" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer">
+                                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function toggleEditWk(index) {
+            const nameInput = document.getElementById(`wk-name-${index}`);
+            const descInput = document.getElementById(`wk-desc-${index}`);
+            const amountInput = document.getElementById(`wk-amount-${index}`);
+            const editBtn = document.getElementById(`wk-edit-btn-${index}`);
+            const row = document.getElementById(`wk-row-${index}`);
+
+            if (!nameInput) return;
+            const isDisabled = nameInput.disabled;
+
+            if (isDisabled) {
+                nameInput.disabled = false;
+                descInput.disabled = false;
+                amountInput.disabled = false;
+                
+                nameInput.classList.remove('bg-transparent', 'border-transparent');
+                nameInput.classList.add('bg-white', 'border-indigo-500');
+                descInput.classList.remove('bg-transparent', 'border-transparent');
+                descInput.classList.add('bg-white', 'border-indigo-500');
+                amountInput.classList.remove('bg-transparent', 'border-transparent');
+                amountInput.classList.add('bg-white', 'border-indigo-500');
+                row.classList.add('bg-indigo-50/25');
+                
+                editBtn.innerHTML = `<svg class="w-4 h-4 text-emerald-600 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                nameInput.focus();
+            } else {
+                wkCategories[index].name = nameInput.value;
+                wkCategories[index].desc = descInput.value;
+                wkCategories[index].amount = parseGermanNumber(amountInput.value);
+                saveData();
+                renderWkTable();
+            }
+        }
+
+        function addWkCategory() {
+            wkCategories.push({ id: 'custom_' + Date.now(), name: 'Neue Ausgabe', desc: 'Beschreibung / Beleg', amount: 0.00 });
+            saveData();
+            renderWkTable();
+        }
+
+        function removeWkCategory(index) {
+            if (wkCategories.length <= 1) return;
+            wkCategories.splice(index, 1);
+            saveData();
+            renderWkTable();
+        }
+
+        function updateAfa(value) {
+            afaValue = parseGermanNumber(value);
+            saveData();
+        }
+
+        function renderUnitTabs() {
+            const container = document.getElementById('unit-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+            unitsData.forEach(u => {
+                const isActive = u.id === currentActiveUnit;
+                container.innerHTML += `
+                    <button type="button" onclick="switchUnit('${u.id}')" class="px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer border ${isActive ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'}">
+                        ${u.name.split(' ')[0]} ${u.rented ? '🟢' : '⚪'}
+                    </button>
+                `;
+            });
+        }
+
+        function switchUnit(unitId) {
+            currentActiveUnit = unitId;
+            renderUnitTabs();
+            
+            const unit = unitsData.find(u => u.id === unitId);
+            document.getElementById('active-unit-title').innerText = unit.name;
+            const badge = document.getElementById('active-unit-status-badge');
+            badge.innerText = unit.rented ? 'Vermietet' : 'Eigengenutzt';
+            badge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full mt-1 inline-block ${unit.rented ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
+
+            const tbody = document.getElementById('monthly-table-body');
+            tbody.innerHTML = '';
+
+            let runningTotal = 0;
+            for (let i = 0; i < 12; i++) {
+                const mData = appData[unitId][i];
+                const monthGesamt = mData.kalt + mData.nk;
+                runningTotal += monthGesamt;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-2.5 px-4 font-semibold text-slate-800">${months[i]}</td>
+                        <td class="py-2.5 px-4 text-right">
+                            <input type="text" value="${mData.kalt.toFixed(2).replace('.', ',')}" onchange="updateMonthValue('${unitId}', ${i}, 'kalt', this.value)"
+                                class="w-24 text-right bg-slate-50 border border-slate-300 rounded px-2 py-1 text-sm font-medium focus:bg-white focus:border-indigo-600">
+                        </td>
+                        <td class="py-2.5 px-4 text-right">
+                            <input type="text" value="${mData.nk.toFixed(2).replace('.', ',')}" onchange="updateMonthValue('${unitId}', ${i}, 'nk', this.value)"
+                                class="w-24 text-right bg-slate-50 border border-slate-300 rounded px-2 py-1 text-sm font-medium focus:bg-white focus:border-indigo-600">
+                        </td>
+                        <td class="py-2.5 px-4 text-right font-bold text-slate-900">${formatCurrency(monthGesamt)}</td>
+                        <td class="py-2.5 px-4 text-right font-extrabold text-indigo-700 bg-slate-50/50">${formatCurrency(runningTotal)}</td>
+                    </tr>
+                `;
+            }
+            updateActiveUnitAnnualTotal();
+        }
+
+        function updateMonthValue(unitId, monthIndex, field, value) {
+            appData[unitId][monthIndex][field] = parseGermanNumber(value);
+            saveData();
+            switchUnit(unitId);
+        }
+
+        function fillEmptyMonths(field) {
+            const stdVal = parseGermanNumber(document.getElementById(field === 'kalt' ? 'std-kalt-val' : 'std-nk-val').value);
+            for (let i = 0; i < 12; i++) {
+                if (appData[currentActiveUnit][i][field] === 0) {
+                    appData[currentActiveUnit][i][field] = stdVal;
+                }
+            }
+            saveData();
+            switchUnit(currentActiveUnit);
+        }
+
+        function fillAllMonths(field) {
+            const stdVal = parseGermanNumber(document.getElementById(field === 'kalt' ? 'std-kalt-val' : 'std-nk-val').value);
+            for (let i = 0; i < 12; i++) {
+                appData[currentActiveUnit][i][field] = stdVal;
+            }
+            saveData();
+            switchUnit(currentActiveUnit);
+        }
+
+        function resetAllMonths() {
+            if (!confirm("Alle Monate für diese Einheit auf 0 € setzen?")) return;
+            for (let i = 0; i < 12; i++) {
+                appData[currentActiveUnit][i].kalt = 0;
+                appData[currentActiveUnit][i].nk = 0;
+            }
+            saveData();
+            switchUnit(currentActiveUnit);
+        }
+
+        function updateActiveUnitAnnualTotal() {
+            let total = 0;
+            for (let i = 0; i < 12; i++) {
+                total += appData[currentActiveUnit][i].kalt + appData[currentActiveUnit][i].nk;
+            }
+            document.getElementById('active-unit-annual-total').innerText = formatCurrency(total);
+        }
+
+        function updateAllCalculations() {
+            let totalHausKalt = 0;
+            let totalHausNk = 0;
+            let totalHausGes = 0;
+
+            unitsData.forEach(unit => {
+                let sumKalt = 0;
+                let sumNk = 0;
+
+                for (let i = 0; i < 12; i++) {
+                    const m = appData[unit.id][i];
+                    sumKalt += m.kalt;
+                    sumNk += m.nk;
+                }
+                const sumGes = sumKalt + sumNk;
+
+                totalHausKalt += sumKalt;
+                totalHausNk += sumNk;
+                totalHausGes += sumGes;
+
+                const elKalt = document.getElementById(`sum-kalt-${unit.id}`);
+                const elNk = document.getElementById(`sum-nk-${unit.id}`);
+                const elGes = document.getElementById(`sum-ges-${unit.id}`);
+
+                if (elKalt) elKalt.innerText = formatCurrency(sumKalt);
+                if (elNk) elNk.innerText = formatCurrency(sumNk);
+                if (elGes) elGes.innerText = formatCurrency(sumGes);
+            });
+
+            const elTotalKalt = document.getElementById('total-haus-kalt');
+            const elTotalNk = document.getElementById('total-haus-nk');
+            const elTotalGes = document.getElementById('total-haus-ges');
+
+            if (elTotalKalt) elTotalKalt.innerText = formatCurrency(totalHausKalt);
+            if (elTotalNk) elTotalNk.innerText = formatCurrency(totalHausNk);
+            if (elTotalGes) elTotalGes.innerText = formatCurrency(totalHausGes);
+
+            // Werbungskosten Summe
+            let totalWk = 0;
+            wkCategories.forEach(cat => {
+                totalWk += cat.amount;
+            });
+
+            const elTotalWk = document.getElementById('summary-total-wk');
+            const elTotalEinnahmenV = document.getElementById('summary-total-einnahmen-v');
+            const elErgebnis = document.getElementById('summary-ergebnis');
+
+            if (elTotalWk) elTotalWk.innerText = formatCurrency(totalWk);
+            if (elTotalEinnahmenV) elTotalEinnahmenV.innerText = formatCurrency(totalHausGes);
+
+            // Ergebnis aus Vermietung (Einnahmen - WK - AfA)
+            const ergebnis = totalHausGes - totalWk - afaValue;
+            if (elErgebnis) {
+                elErgebnis.innerText = formatCurrency(ergebnis);
+            }
+        }
+    </script>
 </body>
 </html>
